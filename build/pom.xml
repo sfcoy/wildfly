@@ -1091,6 +1091,40 @@
                 </dependency>
 
                 <dependency>
+                    <groupId>org.jboss.naming</groupId>
+                    <artifactId>jnp-client</artifactId>
+                    <version>5.0.3.GA</version>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>jboss-common-core</artifactId>
+                            <groupId>org.jboss</groupId>
+                        </exclusion>
+                        <exclusion>
+                            <artifactId>jboss-logging-spi</artifactId>
+                            <groupId>org.jboss.logging</groupId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+        
+                <dependency>
+                    <groupId>org.jboss.client</groupId>
+                    <artifactId>jboss-client</artifactId>
+                    <version>5.1.0.CR1</version>
+                </dependency>
+        
+                <dependency>
+                  <groupId>org.jboss</groupId>
+                  <artifactId>jboss-serialization</artifactId>
+                  <version>1.0.4.FINAL</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.jboss.remoting</groupId>
+                    <artifactId>jboss-remoting</artifactId>
+                    <version>2.5.1</version>
+                </dependency>
+        
+                <dependency>
                     <groupId>org.jboss.ejb3</groupId>
                     <artifactId>jboss-ejb3-ext-api</artifactId>
                 </dependency>

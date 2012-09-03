@@ -157,6 +157,10 @@
         <version.org.jboss.jboss-common-core>2.2.17.GA</version.org.jboss.jboss-common-core>
         <version.org.jboss.com.sun.httpserver>1.0.1.Final</version.org.jboss.com.sun.httpserver>
         <version.org.jboss.ejb-client>1.0.11.Final</version.org.jboss.ejb-client>
+        <version.org.jboss.ejb-client.compatibility.jnp-client>5.0.3.GA</version.org.jboss.ejb-client.compatibility.jnp-client>
+        <version.org.jboss.ejb-client.compatibility.jboss-client>5.1.0.CR1</version.org.jboss.ejb-client.compatibility.jboss-client>
+        <version.org.jboss.ejb-client.compatibility.jboss-serialization>1.0.4.FINAL</version.org.jboss.ejb-client.compatibility.jboss-serialization>
+        <version.org.jboss.ejb-client.compatibility.jboss-remoting>2.5.1</version.org.jboss.ejb-client.compatibility.jboss-remoting>
         <version.org.jboss.ejb3.ext-api>2.0.0</version.org.jboss.ejb3.ext-api>
         <version.org.jboss.iiop-client>1.0.0.Final</version.org.jboss.iiop-client>
         <version.org.jboss.invocation>1.1.1.Final</version.org.jboss.invocation>
@@ -3577,6 +3581,40 @@
                         <artifactId>jboss-logging-spi</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.naming</groupId>
+                <artifactId>jnp-client</artifactId>
+                <version>${version.org.jboss.ejb-client.compatibility.jnp-client}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jboss-common-core</artifactId>
+                        <groupId>org.jboss</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging-spi</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+    
+            <dependency>
+                <groupId>org.jboss.client</groupId>
+                <artifactId>jboss-client</artifactId>
+                <version>${version.org.jboss.ejb-client.compatibility.jboss-client}</version>
+            </dependency>
+    
+            <dependency>
+              <groupId>org.jboss</groupId>
+              <artifactId>jboss-serialization</artifactId>
+              <version>${version.org.jboss.ejb-client.compatibility.jboss-serialization}</version>
+            </dependency>
+    
+            <dependency>
+                <groupId>org.jboss.remoting</groupId>
+                <artifactId>jboss-remoting</artifactId>
+                <version>${version.org.jboss.ejb-client.compatibility.jboss-remoting}</version>
             </dependency>
 
             <dependency>
