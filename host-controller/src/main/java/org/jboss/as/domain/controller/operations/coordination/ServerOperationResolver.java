@@ -16,6 +16,7 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ProxyController;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.descriptions.common.InterfaceDescription;
+import org.jboss.as.controller.operations.OperationAttachments;
 import org.jboss.as.controller.operations.common.ResolveExpressionHandler;
 import org.jboss.as.controller.operations.common.SystemPropertyAddHandler;
 import org.jboss.as.controller.operations.common.SystemPropertyRemoveHandler;
@@ -31,8 +32,9 @@ import org.jboss.dmr.Property;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.CONTENT;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEPLOYMENT;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEPLOYMENT_OVERLAY_LINK;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEPLOYMENT_OVERLAY;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.GROUP;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.HASH;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.HOST;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.INTERFACE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.JVM;
@@ -163,9 +165,14 @@ public class ServerOperationResolver {
         ops.add(op);
     }
 
-    public Map<Set<ServerIdentity>, ModelNode> getServerOperations(OperationContext context, ModelNode operation, PathAddress address) {
+    public Map<Set<ServerIdentity>, ModelNode> getServerOperations(OperationContext context, ModelNode originalOperation, PathAddress address) {
         if (HOST_CONTROLLER_LOGGER.isTraceEnabled()) {
-            HOST_CONTROLLER_LOGGER.tracef("Resolving %s", operation);
+            HOST_CONTROLLER_LOGGER.tracef("Resolving %s", originalOperation);
+        }
+
+        ModelNode operation = context.getAttachment(OperationAttachments.SLAVE_SERVER_OPERATION);
+        if(operation == null) {
+            operation = originalOperation;
         }
 
         Set<ModelNode> dontPropagate = context.getAttachment(DONT_PROPAGATE_TO_SERVERS_ATTACHMENT);
@@ -370,7 +377,7 @@ public class ServerOperationResolver {
             } else if (SYSTEM_PROPERTY.equals(type)) {
                 String affectedGroup = address.getElement(0).getValue();
                 result = getServerSystemPropertyOperations(operation, address, Level.SERVER_GROUP, domain, affectedGroup, host);
-            }  else if (DEPLOYMENT_OVERLAY_LINK.equals(type)) {
+            } else if (DEPLOYMENT_OVERLAY.equals(type) && address.getLastElement().getKey().equals(DEPLOYMENT)) {
                 String groupName = address.getElement(0).getValue();
                 Set<ServerIdentity> servers = getServersForGroup(groupName, host, localHostName, serverProxies);
                 ModelNode serverOp = operation.clone();

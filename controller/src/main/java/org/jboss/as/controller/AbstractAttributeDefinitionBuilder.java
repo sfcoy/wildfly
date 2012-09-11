@@ -54,6 +54,8 @@ public abstract class AbstractAttributeDefinitionBuilder<BUILDER extends Abstrac
     protected int maxSize = Integer.MAX_VALUE;
     protected AttributeAccess.Flag[] flags;
     protected AttributeMarshaller attributeMarshaller = null;
+    protected boolean resourceOnly = false;
+    protected DeprecationData deprecated = null;
 
     public AbstractAttributeDefinitionBuilder(final String attributeName, final ModelType type) {
         this(attributeName, type, false);
@@ -67,7 +69,11 @@ public abstract class AbstractAttributeDefinitionBuilder<BUILDER extends Abstrac
     }
 
     public AbstractAttributeDefinitionBuilder(final AttributeDefinition basis) {
-        this.name = basis.getName();
+        this(null, basis);
+    }
+
+    public AbstractAttributeDefinitionBuilder(final String attributeName, final AttributeDefinition basis) {
+        this.name = attributeName != null ? attributeName : basis.getName();
         this.type = basis.getType();
         this.xmlName = basis.getXmlName();
         this.allowNull = basis.isAllowNull();
@@ -228,8 +234,19 @@ public abstract class AbstractAttributeDefinitionBuilder<BUILDER extends Abstrac
         this.minSize = minSize;
         return (BUILDER) this;
     }
-    public BUILDER setAttributeMarshaller(AttributeMarshaller marshaller){
+
+    public BUILDER setAttributeMarshaller(AttributeMarshaller marshaller) {
         this.attributeMarshaller = marshaller;
-        return (BUILDER)this;
+        return (BUILDER) this;
+    }
+
+    public BUILDER setResourceOnly() {
+        this.resourceOnly = true;
+        return (BUILDER) this;
+    }
+
+    public BUILDER setDeprecated(ModelVersion since) {
+        this.deprecated = new DeprecationData(since);
+        return (BUILDER) this;
     }
 }

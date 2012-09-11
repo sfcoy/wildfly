@@ -46,6 +46,7 @@ public interface KernelServicesBuilder {
      * @param subsystemXml the subsystem xml
      * @throws IllegalStateException if {@link #setBootOperations(List)}, {@link #setSubsystemXml(String)} or {@link #setSubsystemXmlResource(String)} have
      * already been called
+     * @return this builder
      * @throws IllegalStateException if {@link #build()} has already been called
      * @throws AssertionFailedError if the resource could not be found
      * @throws IOException if there were problems reading the resource
@@ -56,6 +57,7 @@ public interface KernelServicesBuilder {
     /**
      * Sets the subsystem xml to be parsed to create the boot operations used to initialize the controller
      * @param subsystemXml the subsystem xml
+     * @return this builder
      * @throws IllegalStateException if {@link #setBootOperations(List)}, {@link #setSubsystemXml(String)} or {@link #setSubsystemXmlResource(String)} have
      * already been called
      * @throws IllegalStateException if {@link #build()} has already been called
@@ -66,6 +68,7 @@ public interface KernelServicesBuilder {
     /**
      * Sets the boot operations to be used to initialize the controller
      * @param bootOperations the boot operations
+     * @return this builder
      * @throws IllegalStateException if {@link #setBootOperations(List)}, {@link #setSubsystemXml(String)} or {@link #setSubsystemXmlResource(String)} have
      * @throws IllegalStateException if {@link #build()} has already been called
      * already been called
@@ -78,7 +81,7 @@ public interface KernelServicesBuilder {
      *
      * @param additionalInit Additional initialization that should be done to the parsers, controller and service container before initializing our extension
      * @param modelVersion The model version of the legacy subsystem
-     *
+     * @return the legacy kernel services initializer
      * @throws IllegalArgumentException if {@code additionalInit} does not have a running mode of {@link RunningMode#ADMIN_ONLY}
      * @throws IllegalStateException if {@link #build()} has already been called
      * @throws IllegalArgumentException if any of the {@code resources} could not be found

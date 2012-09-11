@@ -31,9 +31,12 @@ import static org.jboss.dmr.ModelType.STRING;
 import java.util.EnumSet;
 
 import org.jboss.as.controller.AttributeDefinition;
+import org.jboss.as.controller.ModelVersion;
 import org.jboss.as.controller.ObjectListAttributeDefinition;
+import org.jboss.as.controller.OperationDefinition;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.PrimitiveListAttributeDefinition;
+import org.jboss.as.controller.SimpleOperationDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -54,6 +57,7 @@ public class CoreAddressDefinition extends SimpleResourceDefinition {
     @Deprecated
     private static final AttributeDefinition ROLES = ObjectListAttributeDefinition.Builder.of(CommonAttributes.ROLES_ATTR_NAME, SecurityRoleDefinition.getObjectTypeAttributeDefinition())
             .setFlags(AttributeAccess.Flag.STORAGE_RUNTIME)
+            .setDeprecated(ModelVersion.create(1,2,0))
             .build();
 
     private static final AttributeDefinition QUEUE_NAMES = PrimitiveListAttributeDefinition.Builder.of(CommonAttributes.QUEUE_NAMES, STRING)
@@ -95,8 +99,11 @@ public class CoreAddressDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerOperations(ManagementResourceRegistration registry) {
-        registry.registerOperationHandler(GET_ROLES_AS_JSON, AddressControlHandler.INSTANCE, AddressControlHandler.INSTANCE, EnumSet.of(OperationEntry.Flag.READ_ONLY));
-
+        OperationDefinition rolesAsJsonDef = new SimpleOperationDefinitionBuilder(GET_ROLES_AS_JSON, getResourceDescriptionResolver())
+                .setReplyType(STRING)
+                .withFlags(EnumSet.of(OperationEntry.Flag.READ_ONLY))
+                .build();
+        registry.registerOperationHandler(rolesAsJsonDef, AddressControlHandler.INSTANCE);
         super.registerOperations(registry);
     }
 

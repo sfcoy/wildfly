@@ -48,30 +48,32 @@ public class SimpleAttributeDefinitionBuilder extends AbstractAttributeDefinitio
         return new SimpleAttributeDefinitionBuilder(basis);
     }
 
-      /*
-     "code" => {
-         "type" => STRING,
-         "description" => "Fully Qualified Name of the Security Vault Implementation.",
-         "expressions-allowed" => false,
-         "nillable" => true,
-         "min-length" => 1L,
-         "max-length" => 2147483647L,
-         "access-type" => "read-write",
-         "storage" => "configuration",
-         "restart-required" => "no-services"
-     },
-     */
-      public static SimpleAttributeDefinitionBuilder create(final String name, final ModelNode node) {
-          ModelType type = node.get(ModelDescriptionConstants.TYPE).asType();
-          boolean nillable = node.get(ModelDescriptionConstants.NILLABLE).asBoolean(true);
-          boolean expressionAllowed = node.get(ModelDescriptionConstants.EXPRESSIONS_ALLOWED).asBoolean(false);
-          ModelNode defaultValue = node.get(ModelDescriptionConstants.DEFAULT);
-          return SimpleAttributeDefinitionBuilder.create(name, type, nillable)
-                  .setDefaultValue(defaultValue)
-                  .setAllowExpression(expressionAllowed);
-      }
+    /*
+    "code" => {
+        "type" => STRING,
+        "description" => "Fully Qualified Name of the Security Vault Implementation.",
+        "expressions-allowed" => false,
+        "nillable" => true,
+        "min-length" => 1L,
+        "max-length" => 2147483647L,
+        "access-type" => "read-write",
+        "storage" => "configuration",
+        "restart-required" => "no-services"
+    },
+    */
+    public static SimpleAttributeDefinitionBuilder create(final String name, final ModelNode node) {
+        ModelType type = node.get(ModelDescriptionConstants.TYPE).asType();
+        boolean nillable = node.get(ModelDescriptionConstants.NILLABLE).asBoolean(true);
+        boolean expressionAllowed = node.get(ModelDescriptionConstants.EXPRESSIONS_ALLOWED).asBoolean(false);
+        ModelNode defaultValue = node.get(ModelDescriptionConstants.DEFAULT);
+        return SimpleAttributeDefinitionBuilder.create(name, type, nillable)
+                .setDefaultValue(defaultValue)
+                .setAllowExpression(expressionAllowed);
+    }
 
-
+    public static SimpleAttributeDefinitionBuilder create(final String attributeName, final SimpleAttributeDefinition basis) {
+        return new SimpleAttributeDefinitionBuilder(attributeName, basis);
+    }
 
     public SimpleAttributeDefinitionBuilder(final String attributeName, final ModelType type) {
         this(attributeName, type, false);
@@ -85,14 +87,19 @@ public class SimpleAttributeDefinitionBuilder extends AbstractAttributeDefinitio
         super(basis);
     }
 
+    public SimpleAttributeDefinitionBuilder(final String attributeName, final SimpleAttributeDefinition basis) {
+        super(attributeName, basis);
+    }
+
     public SimpleAttributeDefinition build() {
         return new SimpleAttributeDefinition(name, xmlName, defaultValue, type, allowNull, allowExpression, measurementUnit,
-                                     corrector, validator, validateNull, alternatives, requires, attributeMarshaller, flags);
+                corrector, validator, validateNull, alternatives, requires, attributeMarshaller, resourceOnly,deprecated, flags);
     }
+
     /*
-    ------------------------------------------------------------------------------------------------------
-    methods below are added just to binary maintain compatibility for legacy subsystem transformers tests
-     */
+   ------------------------------------------------------------------------------------------------------
+   methods below are added just to binary maintain compatibility for legacy subsystem transformers tests
+    */
     @Override
     public SimpleAttributeDefinitionBuilder setXmlName(String xmlName) {
         return super.setXmlName(xmlName);

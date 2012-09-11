@@ -7,6 +7,7 @@
             <security-domain>someDomain</security-domain>
             <cluster-user>${messaging.cluster.user.name}</cluster-user>
             <cluster-password>${messaging.cluster.user.password}</cluster-password>
+            <id-cache-size>102030</id-cache-size>
             <remoting-interceptors>
                 <class-name>foo.bar</class-name>
                 <class-name>bar.foo</class-name>
@@ -19,7 +20,7 @@
             <page-max-concurrent-io>10</page-max-concurrent-io>
             <paging-directory path="test" relative-to="test" />
             <bindings-directory path="test" relative-to="test" />
-            <journal-directory path="${my.journal.dir}" relative-to="test" />
+            <journal-directory path="test" relative-to="test" />
             <large-messages-directory path="test" relative-to="test" />
             <connectors>
                <connector name="myconnector">
@@ -244,6 +245,7 @@
                  <client-failure-check-period>12345</client-failure-check-period>
                  <connection-ttl>56789</connection-ttl>
                  <call-timeout>123</call-timeout>
+                 <compress-large-messages>true</compress-large-messages>
                  <consumer-window-size>456</consumer-window-size>
                  <consumer-max-rate>789</consumer-max-rate>
                  <confirmation-window-size>-1</confirmation-window-size>
@@ -287,6 +289,7 @@
                  <client-failure-check-period>12345</client-failure-check-period>
                  <connection-ttl>56789</connection-ttl>
                  <call-timeout>123</call-timeout>
+                 <compress-large-messages>false</compress-large-messages>
                  <consumer-window-size>456</consumer-window-size>
                  <consumer-max-rate>789</consumer-max-rate>
                  <confirmation-window-size>-1</confirmation-window-size>

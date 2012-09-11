@@ -75,7 +75,7 @@ public class ModelDescriptionConstants {
     public static final String DEPLOY = "deploy";
     public static final String DEPLOYMENT = "deployment";
     public static final String DEPLOYMENT_OVERLAY = "deployment-overlay";
-    public static final String DEPLOYMENT_OVERLAY_LINK = "deployment-overlay-link";
+    public static final String DEPRECATED = "deprecated";
     public static final String DESCRIBE = "describe";
     public static final String DESCRIPTION = "description";
     public static final String DESTINATION_ADDRESS = "destination-address";
@@ -196,6 +196,7 @@ public class ModelDescriptionConstants {
     public static final String READ_CHILDREN_TYPES_OPERATION = "read-children-types";
     public static final String READ_CHILDREN_RESOURCES_OPERATION = "read-children-resources";
     public static final String READ_CONFIG_AS_XML_OPERATION = "read-config-as-xml";
+    public static final String READ_CONTENT = "read-content";
     public static final String READ_ONLY = "read-only";
     public static final String READ_OPERATION_DESCRIPTION_OPERATION = "read-operation-description";
     public static final String READ_OPERATION_NAMES_OPERATION = "read-operation-names";
@@ -223,6 +224,7 @@ public class ModelDescriptionConstants {
     public static final String RESTART = "restart";
     public static final String RESTART_REQUIRED = "restart-required";
     public static final String RESULT = "result";
+    public static final String REASON = "reason";
     public static final String ROLLBACK_ACROSS_GROUPS = "rollback-across-groups";
     public static final String ROLLBACK_FAILURE_DESCRIPTION = "rollback-failure-description";
     public static final String ROLLBACK_ON_RUNTIME_FAILURE = "rollback-on-runtime-failure";
@@ -230,6 +232,7 @@ public class ModelDescriptionConstants {
     public static final String ROLLING_TO_SERVERS = "rolling-to-servers";
     public static final String ROLLOUT_PLAN = "rollout-plan";
     public static final String ROLLOUT_PLANS = "rollout-plans";
+    public static final String RUNNING_MODE = "running-mode";
     public static final String RUNNING_SERVER = "server";
     public static final String RUNTIME_NAME = "runtime-name";
     public static final String RUNTIME_UPDATE_SKIPPED = "runtime-update-skipped";
@@ -252,6 +255,7 @@ public class ModelDescriptionConstants {
     public static final String SERVER_OPERATIONS = "server-operations";
     public static final String SERVICE_CONTAINER = "service-container";
     public static final String SOURCE_NETWORK = "source-network";
+    public static final String SINCE = "since";
     public static final String OPERATION_REQUIRES_RELOAD = "operation-requires-reload";
     public static final String OPERATION_REQUIRES_RESTART = "operation-requires-restart";
     public static final String RESTART_SERVERS = "restart-servers";

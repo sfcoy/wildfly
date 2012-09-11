@@ -43,6 +43,8 @@ import org.jboss.dmr.ModelNode;
  */
 public class DivertDefinition extends SimpleResourceDefinition {
 
+    private static final PathElement DIVERT_PATH = PathElement.pathElement(CommonAttributes.DIVERT);
+
     public static final SimpleAttributeDefinition ROUTING_NAME = create("routing-name", STRING)
             .setAllowNull(true)
             .setFlags(RESTART_ALL_SERVICES)
@@ -70,7 +72,7 @@ public class DivertDefinition extends SimpleResourceDefinition {
     private final boolean registerRuntimeOnly;
 
     public DivertDefinition(boolean registerRuntimeOnly) {
-        super(PathElement.pathElement(CommonAttributes.DIVERT),
+        super(DivertDefinition.DIVERT_PATH,
                 MessagingExtension.getResourceDescriptionResolver(CommonAttributes.DIVERT),
                 DivertAdd.INSTANCE,
                 DivertRemove.INSTANCE);
