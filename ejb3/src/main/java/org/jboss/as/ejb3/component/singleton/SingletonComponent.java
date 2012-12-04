@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.ejb.LockType;
 
@@ -74,7 +75,7 @@ public class SingletonComponent extends SessionBeanComponent implements Lockable
      * We can't lock on <code>this</code> because the {@link org.jboss.as.ee.component.BasicComponent#waitForComponentStart()}
      * also synchronizes on it, and calls {@link #wait()}.
      */
-    private final Object creationLock = new Object();
+    private final ReentrantLock creationLock = new ReentrantLock();
 
     /**
      * Construct a new instance.
@@ -97,7 +98,7 @@ public class SingletonComponent extends SessionBeanComponent implements Lockable
     @Override
     protected BasicComponentInstance instantiateComponentInstance(AtomicReference<ManagedReference> instanceReference, Interceptor preDestroyInterceptor, Map<Method, Interceptor> methodInterceptors, final InterceptorFactoryContext interceptorContext) {
         // synchronized from getComponentInstance
-        assert Thread.holdsLock(creationLock);
+        assert creationLock.isHeldByCurrentThread();
 
         if (dependsOn != null) {
             for (ServiceName serviceName : dependsOn) {
@@ -112,14 +113,17 @@ public class SingletonComponent extends SessionBeanComponent implements Lockable
     }
 
     public SingletonComponentInstance getComponentInstance() {
-        if (this.singletonComponentInstance == null) {
-            synchronized (creationLock) {
-                if (this.singletonComponentInstance == null) {
-                    this.singletonComponentInstance = (SingletonComponentInstance) this.createInstance();
-                }
+        creationLock.lock();
+        try {
+            if (singletonComponentInstance == null) {
+                if (creationLock.getHoldCount() > 1)
+                    throw new IllegalStateException("Reentrant singleton creation");
+                singletonComponentInstance = (SingletonComponentInstance) this.createInstance();
             }
+            return singletonComponentInstance;
+        } finally {
+            creationLock.unlock();
         }
-        return this.singletonComponentInstance;
     }
 
     @Override
@@ -178,11 +182,14 @@ public class SingletonComponent extends SessionBeanComponent implements Lockable
     }
 
     private void destroySingletonInstance() {
-        synchronized (creationLock) {
+        creationLock.lock();
+        try {
             if (this.singletonComponentInstance != null) {
                 singletonComponentInstance.destroy();
                 this.singletonComponentInstance = null;
             }
+        } finally {
+            creationLock.unlock();
         }
     }
 
