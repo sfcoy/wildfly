@@ -67,7 +67,6 @@ import org.jboss.as.ejb3.component.singleton.SingletonComponent;
 import org.jboss.as.ejb3.component.stateful.CurrentSynchronizationCallback;
 import org.jboss.as.ejb3.context.CurrentInvocationContext;
 import org.jboss.as.ejb3.timerservice.persistence.CalendarTimerEntity;
-import org.jboss.as.ejb3.timerservice.persistence.TimeoutMethod;
 import org.jboss.as.ejb3.timerservice.persistence.TimerEntity;
 import org.jboss.as.ejb3.timerservice.persistence.TimerPersistence;
 import org.jboss.as.ejb3.timerservice.schedule.CalendarBasedTimeout;
@@ -648,13 +647,7 @@ public class TimerServiceImpl implements TimerService, Service<TimerService> {
                 ListIterator<ScheduleTimer> it = newAutoTimers.listIterator();
                 while (it.hasNext()) {
                     ScheduleTimer timer = it.next();
-                    final String methodName = timer.getMethod().getName();
-                    final String[] params = new String[timer.getMethod().getParameterTypes().length];
-                    for (int i = 0; i < timer.getMethod().getParameterTypes().length; ++i) {
-                        params[i] = timer.getMethod().getParameterTypes()[i].getName();
-                    }
-                    if (doesTimeoutMethodMatch(entity.getTimeoutMethod(), methodName, params)) {
-
+                    if (entity.getTimeoutMethod().matchesWith(timer.getMethod())) {
                         //the timers have the same method.
                         //now lets make sure the schedule is the same
                         // and the timer does not change the persistence
@@ -868,10 +861,7 @@ public class TimerServiceImpl implements TimerService, Service<TimerService> {
         if (timerEntity == null) {
             throw EJB3_LOGGER.timerNotFound(id);
         }
-        if (timerEntity.isCalendarTimer()) {
-            return new CalendarTimer((CalendarTimerEntity) timerEntity, this);
-        }
-        return new TimerImpl(timerEntity, this);
+        return timerEntity.createTimer(this);
 
     }
 
@@ -900,17 +890,12 @@ public class TimerServiceImpl implements TimerService, Service<TimerService> {
             if (ineligibleTimerStates.contains(persistedTimer.getTimerState())) {
                 continue;
             }
-            TimerImpl activeTimer;
-            if (persistedTimer.isCalendarTimer()) {
-                final CalendarTimerEntity calendarTimerEntity = (CalendarTimerEntity) persistedTimer;
-                // create a timer instance from the persisted calendar timer
-                activeTimer = new CalendarTimer(calendarTimerEntity, this);
-            } else {
-                // create the timer instance from the persisted state
-                activeTimer = new TimerImpl(persistedTimer, this);
+            try {
+                TimerImpl activeTimer = persistedTimer.createTimer(this);
+                activeTimers.add(activeTimer);
+            } catch (RuntimeException e) {
+                EJB3_LOGGER.timerReinstatementFailed(persistedTimer.getTimedObjectId(), persistedTimer.getId(), e);
             }
-            // add it to the list of timers which will be restored
-            activeTimers.add(activeTimer);
         }
 
         return activeTimers;
@@ -926,17 +911,6 @@ public class TimerServiceImpl implements TimerService, Service<TimerService> {
         Object clonedInfo = objectInputStream.readObject();
 
         return (Serializable) clonedInfo;
-    }
-
-    private boolean doesTimeoutMethodMatch(final TimeoutMethod timeoutMethod, final String timeoutMethodName, final String[] methodParams) {
-        if (timeoutMethod.getMethodName().equals(timeoutMethodName) == false) {
-            return false;
-        }
-        final String[] timeoutMethodParams = timeoutMethod.getMethodParams();
-        if (timeoutMethodParams == null && methodParams == null) {
-            return true;
-        }
-        return this.methodParamsMatch(timeoutMethodParams, methodParams);
     }
 
     private boolean doesScheduleMatch(final ScheduleExpression expression1, final ScheduleExpression expression2) {

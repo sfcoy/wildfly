@@ -2134,4 +2134,7 @@ public interface EjbMessages {
     @Message(id = 14232, value = "@PostConstruct method of EJB singleton %s of type %s has been recursively invoked")
     IllegalStateException reentrantSingletonCreation(String componentName, String componentClassName);
 
+    @Message(id = 14233, value = "An EJB @Timeout or @Schedule method may declare zero arguments or a single javax.ejb.Timer argument. Found %s")
+    IllegalArgumentException wrongNumberOfEjbTimerArguments(Method method);
+
 }

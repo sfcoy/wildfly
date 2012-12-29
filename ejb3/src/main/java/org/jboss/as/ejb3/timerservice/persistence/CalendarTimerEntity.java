@@ -21,12 +21,16 @@
  */
 package org.jboss.as.ejb3.timerservice.persistence;
 
+import static org.jboss.as.ejb3.EjbMessages.MESSAGES;
+
 import java.lang.reflect.Method;
 import java.util.Date;
 
 import javax.ejb.ScheduleExpression;
 
 import org.jboss.as.ejb3.timerservice.CalendarTimer;
+import org.jboss.as.ejb3.timerservice.TimerImpl;
+import org.jboss.as.ejb3.timerservice.TimerServiceImpl;
 import org.jboss.as.ejb3.timerservice.schedule.CalendarBasedTimeout;
 
 /**
@@ -72,11 +76,17 @@ public class CalendarTimerEntity extends TimerEntity {
         if (calendarTimer.isAutoTimer()) {
             Method method = calendarTimer.getTimeoutMethod();
             Class<?>[] methodParams = method.getParameterTypes();
-            String[] params = new String[methodParams.length];
-            for (int i = 0; i < methodParams.length; i++) {
-                params[i] = methodParams[i].getName();
+            switch (methodParams.length) {
+                case 0:
+                    this.timeoutMethod = new TimeoutMethod(method.getDeclaringClass().getName(), method.getName());
+                    break;
+                case 1:
+                    this.timeoutMethod = new TimeoutMethodWithTimer(method.getDeclaringClass().getName(), method.getName());
+                    break;
+                default:
+                    // should be impossible to get here
+                    throw MESSAGES.wrongNumberOfEjbTimerArguments(method);
             }
-            this.timeoutMethod = new TimeoutMethod(method.getDeclaringClass().getName(), method.getName(), params);
         } else {
             this.timeoutMethod = null;
         }
@@ -94,10 +104,6 @@ public class CalendarTimerEntity extends TimerEntity {
 
     }
 
-    @Override
-    public boolean isCalendarTimer() {
-        return true;
-    }
 
     public ScheduleExpression getScheduleExpression() {
         if (this.scheduleExpression == null) {
@@ -166,26 +172,8 @@ public class CalendarTimerEntity extends TimerEntity {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj instanceof CalendarTimerEntity == false) {
-            return false;
-        }
-        CalendarTimerEntity other = (CalendarTimerEntity) obj;
-        if (this.id == null) {
-            return false;
-        }
-        return this.id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        if (this.id == null) {
-            return super.hashCode();
-        }
-        return this.id.hashCode();
+    public TimerImpl createTimer(TimerServiceImpl timerService) {
+        return new CalendarTimer(this, timerService);
     }
 
 }

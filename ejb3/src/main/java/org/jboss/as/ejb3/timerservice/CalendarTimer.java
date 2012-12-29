@@ -28,7 +28,6 @@ import java.util.Calendar;
 import javax.ejb.EJBException;
 import javax.ejb.ScheduleExpression;
 
-import org.jboss.as.ejb3.EjbLogger;
 import org.jboss.as.ejb3.timerservice.persistence.CalendarTimerEntity;
 import org.jboss.as.ejb3.timerservice.persistence.TimeoutMethod;
 import org.jboss.as.ejb3.timerservice.persistence.TimerEntity;
@@ -59,31 +58,6 @@ public class CalendarTimer extends TimerImpl {
     private final boolean autoTimer;
 
     private final Method timeoutMethod;
-
-    /**
-     * Constructs a {@link CalendarTimer}
-     *
-     * @param id              The id of this timer
-     * @param timerService    The timer service to which this timer belongs
-     * @param calendarTimeout The {@link CalendarBasedTimeout} from which this {@link CalendarTimer} is being created
-     */
-    public CalendarTimer(String id, TimerServiceImpl timerService, CalendarBasedTimeout calendarTimeout, Object primaryKey) {
-        this(id, timerService, calendarTimeout, null, true, primaryKey);
-    }
-
-    /**
-     * Constructs a {@link CalendarTimer}
-     *
-     * @param id              The id of this timer
-     * @param timerService    The timer service to which this timer belongs
-     * @param calendarTimeout The {@link CalendarBasedTimeout} from which this {@link CalendarTimer} is being created
-     * @param info            The serializable info which will be made available through {@link javax.ejb.Timer#getInfo()}
-     * @param persistent      True if this timer is persistent. False otherwise
-     */
-    public CalendarTimer(String id, TimerServiceImpl timerService, CalendarBasedTimeout calendarTimeout,
-                         Serializable info, boolean persistent, Object primaryKey) {
-        this(id, timerService, calendarTimeout, info, persistent, null, primaryKey);
-    }
 
     /**
      * Constructs a {@link CalendarTimer}
@@ -134,10 +108,7 @@ public class CalendarTimer extends TimerImpl {
         if (persistedCalendarTimer.isAutoTimer()) {
             this.autoTimer = true;
             TimeoutMethod timeoutMethodInfo = persistedCalendarTimer.getTimeoutMethod();
-            this.timeoutMethod = this.getTimeoutMethod(timeoutMethodInfo);
-            if (this.timeoutMethod == null) {
-                throw MESSAGES.failToFindTimeoutMethod(timeoutMethodInfo);
-            }
+            this.timeoutMethod = timeoutMethodInfo.findTimeoutMethod(timerService.getInvoker().getClassLoader());
         } else {
             this.autoTimer = false;
             this.timeoutMethod = null;
@@ -217,101 +188,5 @@ public class CalendarTimer extends TimerImpl {
         }
         return this.timeoutMethod;
     }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    /**
-     * A {@link javax.ejb.Timer} is equal to another {@link javax.ejb.Timer} if their
-     * {@link javax.ejb.TimerHandle}s are equal
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this.handle == null) {
-            return false;
-        }
-        if (!(obj instanceof CalendarTimer)) {
-            return false;
-        }
-        CalendarTimer otherTimer = (CalendarTimer) obj;
-        return this.handle.equals(otherTimer.getTimerHandle());
-    }
-
-
-    /**
-     * Returns the {@link java.lang.reflect.Method}, represented by the {@link TimeoutMethod}
-     * <p>
-     * Note: This method uses the {@link Thread#getContextClassLoader()} to load the
-     * relevant classes while getting the {@link java.lang.reflect.Method}
-     * </p>
-     *
-     * @param timeoutMethodInfo The timeout method
-     * @return
-     */
-    private Method getTimeoutMethod(TimeoutMethod timeoutMethodInfo) {
-
-        String declaringClass = timeoutMethodInfo.getDeclaringClass();
-        Class<?> timeoutMethodDeclaringClass = null;
-        try {
-            timeoutMethodDeclaringClass = Class.forName(declaringClass, false, timedObjectInvoker.getClassLoader());
-        } catch (ClassNotFoundException cnfe) {
-            throw MESSAGES.failToLoadDeclaringClassOfTimeOut(declaringClass);
-        }
-
-        String timeoutMethodName = timeoutMethodInfo.getMethodName();
-        String[] timeoutMethodParams = timeoutMethodInfo.getMethodParams();
-        // load the method param classes
-        Class<?>[] timeoutMethodParamTypes = new Class<?>[]
-                {};
-        if (timeoutMethodParams != null) {
-            timeoutMethodParamTypes = new Class<?>[timeoutMethodParams.length];
-            int i = 0;
-            for (String paramClassName : timeoutMethodParams) {
-                Class<?> methodParamClass = null;
-                try {
-                    methodParamClass = Class.forName(paramClassName, false, timedObjectInvoker.getClassLoader());
-                } catch (ClassNotFoundException cnfe) {
-                    throw EjbLogger.EJB3_LOGGER.failedToLoadTimeoutMethodParamClass(cnfe, paramClassName);
-                }
-                timeoutMethodParamTypes[i++] = methodParamClass;
-            }
-        }
-        // now start looking for the method
-        Class<?> klass = timeoutMethodDeclaringClass;
-        while (klass != null) {
-            Method[] methods = klass.getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(timeoutMethodName)) {
-                    Class<?>[] methodParamTypes = method.getParameterTypes();
-                    // param length doesn't match
-                    if (timeoutMethodParamTypes.length != methodParamTypes.length) {
-                        continue;
-                    }
-                    boolean match = true;
-                    for (int i = 0; i < methodParamTypes.length; i++) {
-                        // param type doesn't match
-                        if (!timeoutMethodParamTypes[i].equals(methodParamTypes[i])) {
-                            match = false;
-                            break;
-                        }
-                    }
-                    if (match) {
-                        // match found
-                        return method;
-                    }
-                }
-            }
-            klass = klass.getSuperclass();
-
-        }
-        // no match found
-        return null;
-    }
-
 
 }

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.jboss.as.ejb3.timerservice.TimerImpl;
+import org.jboss.as.ejb3.timerservice.TimerServiceImpl;
 import org.jboss.as.ejb3.timerservice.TimerState;
 
 /**
@@ -101,35 +102,44 @@ public class TimerEntity implements Serializable {
         return timerState;
     }
 
-    public boolean isCalendarTimer() {
-        return false;
-    }
-
     public Object getPrimaryKey() {
         return primaryKey;
     }
 
+    /**
+     * Creates a {@link Timer} implementation corresponding to this entity.
+     *
+     * @param timerService
+     * @return
+     */
+    public TimerImpl createTimer(TimerServiceImpl timerService) {
+        return new TimerImpl(this, timerService);
+    }
+
+    /**
+     * The identity of objects of this class and all it's subclasses is represented by the {@link #id} field.
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof TimerEntity)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         TimerEntity other = (TimerEntity) obj;
-        if (this.id == null) {
-            return false;
-        }
-        return this.id.equals(other.id);
+        return id.equals(other.id);
     }
 
     @Override
-    public int hashCode() {
-        if (this.id == null) {
-            return super.hashCode();
-        }
-        return this.id.hashCode();
+    public final int hashCode() {
+        return id.hashCode();
     }
+
 
 }

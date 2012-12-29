@@ -577,14 +577,14 @@ public class TimerImpl implements Timer {
      * {@link javax.ejb.TimerHandle}s are equal
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
-        if (this.handle == null) {
-            return false;
-        }
-        if (obj instanceof TimerImpl == false) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         TimerImpl otherTimer = (TimerImpl) obj;
@@ -592,7 +592,7 @@ public class TimerImpl implements Timer {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return this.handle.hashCode();
     }
 

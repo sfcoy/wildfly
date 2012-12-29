@@ -21,39 +21,33 @@
  */
 package org.jboss.as.ejb3.timerservice.persistence;
 
+import static org.jboss.as.ejb3.EjbMessages.MESSAGES;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Method;
 
 /**
- * TimeoutMethod
+ * The persisted attributes corresponding to an EJB Timeout method. An EJB timeout method may have zero args, or a single
+ * {@link javax.ejb.Timer} arg. This class includes zero arg behaviour. See {@link TimeoutMethodWithTimer} for one arg
+ * behaviour.
  *
  * @author Jaikiran Pai
  * @author Stuart Douglas
+ * @author steve.coy
  */
 public class TimeoutMethod implements Serializable {
 
-    private Long id;
+    protected Long id;
 
-    private String declaringClass;
+    protected String declaringClass;
 
-    private String methodName;
-
-    private List<String> methodParams;
+    protected String methodName;
 
     private transient String cachedToString;
 
-    public TimeoutMethod() {
-
-    }
-
-    public TimeoutMethod(String declaringClass, String methodName, String[] methodParams) {
+    public TimeoutMethod(String declaringClass, String methodName) {
         this.declaringClass = declaringClass;
         this.methodName = methodName;
-        if (methodParams != null) {
-            this.methodParams = new ArrayList<String>(Arrays.asList(methodParams));
-        }
     }
 
     public Long getId() {
@@ -64,16 +58,44 @@ public class TimeoutMethod implements Serializable {
         return methodName;
     }
 
-
-    public String[] getMethodParams() {
-        if (this.methodParams == null) {
-            return null;
-        }
-        return methodParams.toArray(new String[]{});
-    }
-
     public String getDeclaringClass() {
         return declaringClass;
+    }
+
+    /**
+     * @param classLoader the class loader containing the timeout method's classes.
+     * @return the {@link java.lang.reflect.Method} represented by this object.
+     */
+    public Method findTimeoutMethod(ClassLoader classLoader) {
+        for (Class<?> klass = this.lookupMethodDeclaringClass(classLoader); klass != null; klass = klass.getSuperclass()) {
+            for (Method method : klass.getDeclaredMethods()) {
+                if (this.matchesWith(method)) {
+                    return method;
+                }
+            }
+        }
+        throw MESSAGES.failToFindTimeoutMethod(this);
+    }
+
+    /**
+     * @param method
+     * @return true if the method name and argument list matches this instance
+     */
+    public boolean matchesWith(Method method) {
+        return method.getParameterTypes().length == 0 && method.getName().equals(methodName);
+    }
+
+    /**
+     * @param classLoader
+     * @return the {@link Class} object corresponding to this TimeoutMethod's declaring class
+     */
+    private Class<?> lookupMethodDeclaringClass(ClassLoader classLoader) {
+        try {
+            return Class.forName(declaringClass, false, classLoader);
+        } catch (ClassNotFoundException cnfe) {
+            // This should be impossible at this point...
+            throw MESSAGES.failToLoadDeclaringClassOfTimeOut(declaringClass);
+        }
     }
 
     @Override
@@ -84,18 +106,14 @@ public class TimeoutMethod implements Serializable {
             sb.append(".");
             sb.append(this.methodName);
             sb.append("(");
-            if (this.methodParams != null) {
-                for (int i = 0; i < this.methodParams.size(); i++) {
-                    sb.append(this.methodParams.get(i));
-                    if (i != this.methodParams.size() - 1) {
-                        sb.append(",");
-                    }
-                }
-            }
+            sb.append(this.argsAsString());
             sb.append(")");
             this.cachedToString = sb.toString();
         }
         return this.cachedToString;
     }
 
+    protected String argsAsString() {
+        return "";
+    }
 }
