@@ -61,7 +61,6 @@ import org.junit.runner.RunWith;
  * @see https://issues.jboss.org/browse/AS7-3492
  */
 @RunWith(Arquillian.class)
-@Ignore("AS7-5318")
 public class LocalEJBClientFailoverTestCase {
 
     private static final Logger logger = Logger.getLogger(LocalEJBClientFailoverTestCase.class);
@@ -89,7 +88,7 @@ public class LocalEJBClientFailoverTestCase {
 
     @Deployment(name = CLIENT_ARQ_DEPLOYMENT, testable = false, managed = false)
     @TargetsContainer(ClusteringTestConstants.CONTAINER_2)
-    public static Archive createClientApplication() {
+    public static Archive<JavaArchive> createClientApplication() {
         final JavaArchive jar = ShrinkWrap.create(JavaArchive.class, CLIENT_APP_MODULE_NAME + ".jar");
         jar.addClasses(ClientSFSB.class, ClientSFSBRemote.class, NodeNameRetriever.class);
         jar.addAsManifestResource(LocalEJBClientFailoverTestCase.class.getPackage(), "local-ejb-client-failover-jboss-ejb-client.xml", "jboss-ejb-client.xml");
@@ -99,17 +98,17 @@ public class LocalEJBClientFailoverTestCase {
 
     @Deployment(name = NODE_NAME_ARQ_DEPLOYMENT_CONTAINER_1, testable = false, managed = false)
     @TargetsContainer(ClusteringTestConstants.CONTAINER_1)
-    public static Archive createNodeNameApplicationForContainer1() {
+    public static Archive<JavaArchive> createNodeNameApplicationForContainer1() {
         return createNodeNameApplication();
     }
 
     @Deployment(name = NODE_NAME_ARQ_DEPLOYMENT_CONTAINER_2, testable = false, managed = false)
     @TargetsContainer(ClusteringTestConstants.CONTAINER_2)
-    public static Archive createNodeNameApplicationForContainer2() {
+    public static Archive<JavaArchive> createNodeNameApplicationForContainer2() {
         return createNodeNameApplication();
     }
 
-    private static Archive createNodeNameApplication() {
+    private static Archive<JavaArchive> createNodeNameApplication() {
         final JavaArchive jar = ShrinkWrap.create(JavaArchive.class, NODE_NAME_APP_MODULE_NAME + ".jar");
         jar.addClasses(NodeNameRetriever.class, NodeNameSFSB.class);
         return jar;
