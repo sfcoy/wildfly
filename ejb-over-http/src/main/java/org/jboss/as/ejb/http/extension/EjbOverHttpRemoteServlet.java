@@ -57,8 +57,7 @@ public class EjbOverHttpRemoteServlet extends HttpServlet {
         final AsyncContext asyncContext = request.startAsync();
         final HttpChannel httpChannel = new HttpChannel(asyncContext);
         final HttpMessageInputStream httpMessageInputStream = new HttpMessageInputStream(asyncContext.getRequest().getInputStream());
-        if (receiver != null)
-            receiver.handleMessage(httpChannel, httpMessageInputStream);
+        receiver.handleMessage(httpChannel, httpMessageInputStream);
     }
 
 }
